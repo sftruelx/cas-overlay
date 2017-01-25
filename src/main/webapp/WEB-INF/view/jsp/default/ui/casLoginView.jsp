@@ -69,8 +69,8 @@
 <script type="text/javascript" src="javascript/jquery-1.10.2.js"></script>
 <script type="text/javascript">
     $(function () {
-        $('#username').attr('placeholder', 'Username');
-        $('#password').attr('placeholder', 'Password');
+        $('#username').attr('placeholder', '用户名');
+        $('#password').attr('placeholder', '密码');
         $('#j_captcha_response').attr('placeholder', 'Captcha');
         if (!$('#password').val()) {
             $('#password').focus();

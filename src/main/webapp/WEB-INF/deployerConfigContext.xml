@@ -56,16 +56,16 @@
     <bean id="attributeRepository"
           class="org.jasig.services.persondir.support.jdbc.SingleRowJdbcPersonAttributeDao">
         <constructor-arg index="0" ref="dataSource"/>
-        <constructor-arg index="1" value="SELECT * FROM gionee_user WHERE {0}"/>
+        <constructor-arg index="1" value="SELECT * FROM user_zac WHERE {0}"/>
         <property name="queryAttributeMapping">
             <map>
-                <entry key="username" value="username_"/>
+                <entry key="username" value="username"/>
             </map>
         </property>
         <property name="resultAttributeMapping">
             <map>
-                <entry key="username_" value="userId"/>
-                <entry key="id_" value="globalId"/>
+                <entry key="id" value="userId"/>
+                <entry key="id" value="globalId"/>
             </map>
         </property>
     </bean>
