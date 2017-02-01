@@ -93,7 +93,7 @@ public class AuthenticationViaFormAction {
                 .warning()
                 .code(warning.getCode())
                 .defaultText(warning.getDefaultMessage())
-                .args(warning.getParams());
+                .args((Object[]) warning.getParams());
         context.addMessage(builder.build());
     }
 
