@@ -1,12 +1,12 @@
 {
   "@class": "org.jasig.cas.services.RegexRegisteredService",
-  "serviceId": "^http://.*",
+  "serviceId" : "^(https|imaps|http)://.*",
   "name": "Apereo",
   "theme": "apereo",
   "id": 10000002,
   "description": "Apereo foundation sample service",
   "proxyPolicy": {
-    "@class": "org.jasig.cas.services.RefuseRegisteredServiceProxyPolicy"
+    "@class": "com.gionee.cas.services.AllowRegisteredServiceProxyPolicy"
   },
   "evaluationOrder": 1,
   "usernameAttributeProvider": {

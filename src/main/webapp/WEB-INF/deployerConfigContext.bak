@@ -42,11 +42,26 @@
           class="org.jasig.cas.authentication.handler.support.HttpBasedServiceCredentialsAuthenticationHandler"/>
 
     <bean id="authenticationManager" class="org.jasig.cas.authentication.PolicyBasedAuthenticationManager">
-        <constructor-arg ref="authenticationHandlersResolvers"/>
+        <constructor-arg>
+            <map>
+                <!--
+                   | IMPORTANT
+                   | Every handler requires a unique name.
+                   | If more than one instance of the same handler class is configured, you must explicitly
+                   | set its name to something other than its default name (typically the simple class name).
+                   -->
+                <entry key-ref="proxyAuthenticationHandler" value-ref="proxyPrincipalResolver" />
+                <entry key-ref="queryDatabaseAuthenticationHandler" value-ref="primaryPrincipalResolver"/>
+            </map>
+        </constructor-arg>
+
         <property name="authenticationPolicy">
-            <bean class="org.jasig.cas.authentication.AnyAuthenticationPolicy"/>
+            <bean class="org.jasig.cas.authentication.AnyAuthenticationPolicy" />
         </property>
     </bean>
+    <!-- Required for proxy ticket mechanism -->
+    <bean id="proxyPrincipalResolver"
+          class="org.jasig.cas.authentication.principal.BasicPrincipalResolver" />
 
     <bean id="personDirectoryPrincipalResolver"
           class="org.jasig.cas.authentication.principal.PersonDirectoryPrincipalResolver"
@@ -64,7 +79,7 @@
         </property>
         <property name="resultAttributeMapping">
             <map>
-                <entry key="username" value="userId"/>
+                <entry key="id" value="userId"/>
                 <entry key="id" value="globalId"/>
             </map>
         </property>
@@ -91,10 +106,6 @@
 
     <alias name="serviceThemeResolver" alias="themeResolver"/>
 
-    <alias name="jsonServiceRegistryDao" alias="serviceRegistryDao"/>
-
-    <alias name="defaultTicketRegistry" alias="ticketRegistry"/>
-
     <alias name="ticketGrantingTicketExpirationPolicy" alias="grantingTicketExpirationPolicy"/>
     <alias name="multiTimeUseOrTimeoutExpirationPolicy" alias="serviceTicketExpirationPolicy"/>
 
@@ -108,11 +119,6 @@
 
     <alias name="neverThrottle" alias="authenticationThrottle"/>
 
-    <util:list id="monitorsList">
-        <ref bean="memoryMonitor"/>
-        <ref bean="sessionMonitor"/>
-    </util:list>
-
     <alias name="defaultPrincipalFactory" alias="principalFactory"/>
     <alias name="defaultAuthenticationTransactionManager" alias="authenticationTransactionManager"/>
     <alias name="defaultPrincipalElectionStrategy" alias="principalElectionStrategy"/>
@@ -122,7 +128,29 @@
         <entry key-ref="queryDatabaseAuthenticationHandler" value-ref="primaryPrincipalResolver"/>
     </util:map>
 
-    <bean id="proxyPrincipalResolver"
-          class="org.jasig.cas.authentication.principal.BasicPrincipalResolver"/>
+    <bean id="serviceRegistryDao" class="org.jasig.cas.services.InMemoryServiceRegistryDaoImpl"
+          p:registeredServices-ref="registeredServicesList" />
 
+    <util:list id="registeredServicesList">
+        <bean class="org.jasig.cas.services.RegexRegisteredService"
+              p:id="0" p:name="HTTP and IMAP" p:description="Allows HTTP(S) and IMAP(S) protocols"
+              p:serviceId="^(https?|imaps?)://.*" p:evaluationOrder="10000001"  />
+    </util:list>
+
+    <bean id="healthCheckMonitor" class="org.jasig.cas.monitor.HealthCheckMonitor" p:monitors-ref="monitorsList" />
+
+    <util:list id="monitorsList">
+        <bean class="org.jasig.cas.monitor.MemoryMonitor" p:freeMemoryWarnThreshold="10" />
+        <!--
+          NOTE
+          The following ticket registries support SessionMonitor:
+            * DefaultTicketRegistry
+            * JpaTicketRegistry
+          Remove this monitor if you use an unsupported registry.
+        -->
+        <bean class="org.jasig.cas.monitor.SessionMonitor"
+              p:ticketRegistry-ref="ticketRegistry"
+              p:serviceTicketCountWarnThreshold="5000"
+              p:sessionCountWarnThreshold="100000" />
+    </util:list>
 </beans>

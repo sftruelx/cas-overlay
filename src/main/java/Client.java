@@ -115,9 +115,9 @@ public class Client {
 
         final HttpClient client = new HttpClient();
         GetMethod post = null;
-
         try {
-            post = new GetMethod(serverValidate + "?" + "ticket=" + serviceTicket + "&service=" + URLEncoder.encode(service, "UTF-8"));
+            post = new GetMethod(serverValidate + "?" + "ticket=" + serviceTicket + "&service=" + URLEncoder.encode(service, "UTF-8") + "&pgtUrl=" + URLEncoder.encode("https://localhost:8440/j_spring_cas_security_proxyreceptor", "UTF-8"));
+            info(post.getURI().toString());
             client.executeMethod(post);
 
             final String response = post.getResponseBodyAsString();
@@ -138,18 +138,47 @@ public class Client {
         }
 
     }
+    private static void ticketValidate1(String serverValidate, String serviceTicket, String service) {
+        notNull(serviceTicket, "paramter 'serviceTicket' is not null");
+        notNull(service, "paramter 'service' is not null");
 
+        final HttpClient client = new HttpClient();
+        GetMethod post = null;
+        try {
+            post = new GetMethod(serverValidate + "?" + "ticket=" + serviceTicket + "&service=" + URLEncoder.encode(service, "UTF-8") );
+            info(post.getURI().toString());
+            client.executeMethod(post);
+
+            final String response = post.getResponseBodyAsString();
+            info(response);
+            switch (post.getStatusCode()) {
+                case 200: {
+                    info("成功取得用户数据");
+                }
+                default: {
+                }
+            }
+
+        } catch (Exception e) {
+            warning(e.getMessage());
+        } finally {
+            //释放资源
+            post.releaseConnection();
+        }
+
+    }
     private static void notNull(final Object object, final String message) {
         if (object == null)
             throw new IllegalArgumentException(message);
     }
 
     public static void main(final String[] args) throws Exception {
-        final String server = "http://localhost:8888/v1/tickets";
+        final String server = "https://localhost:8443/cas/v1/tickets";
         final String username = "lx";
         final String password = "lx";
-        final String service = "http://localhost:8080";
-        final String proxyValidate = "http://localhost:8888/proxyValidate";
+        final String service = "http://localhost:8440/home";
+        final String proxyValidate = "https://localhost:8443/cas/proxyValidate";
+//        ticketValidate1();
         ticketValidate(proxyValidate, getTicket(server, username, password, service), service);
     }
 
